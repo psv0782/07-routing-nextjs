@@ -14,6 +14,8 @@ import css from "./NotesPage.module.css";
 import {number, string} from "yup";
 
 type Props = {
+    initialSearch: string;
+    initialPage: number;
     initialData: {
         notes: Note[];
         totalPages: number;
@@ -22,9 +24,9 @@ type Props = {
     category?: undefined | string
 };
 
-export default function NotesClient({initialData, tag, category}: Props) {
-    const [searchText, setSearchText] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
+export default function NotesClient({initialSearch, initialPage, initialData, tag, category}: Props) {
+    const [searchText, setSearchText] = useState(initialSearch);
+    const [currentPage, setCurrentPage] = useState(initialPage);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [debouncedSearch] = useDebounce(searchText, 300);

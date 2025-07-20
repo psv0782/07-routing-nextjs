@@ -6,9 +6,12 @@ type Props = {
 };
 
 export default async function AppPage({params}: Props) {
+    const initialSearch = "";
+    const initialPage = 1;
     const {slug} = await params;
     const category = slug[0] === "all" ? undefined : slug[0];
     const data = await fetchNotes("", 1, 9, category);
 
-    return <NotesClient initialData={data} category={category}/>;
+    return <NotesClient initialSearch={initialSearch}
+                        initialPage={initialPage} initialData={data} category={category}/>;
 }
