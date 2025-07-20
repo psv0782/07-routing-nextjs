@@ -1,10 +1,10 @@
-import { useId } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Formik, Field, Form, ErrorMessage } from "formik";
+import {useId} from "react";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {Formik, Field, Form, ErrorMessage} from "formik";
 import * as Yup from "yup";
-import css from "./NoteForm.module.css";
-import {CreateNote} from "@/types/note";
+import type {CreateNote} from "@/types/note";
 import {createNote} from "@/lib/api";
+import css from "./NoteForm.module.css";
 
 const initialValues: CreateNote = {
     title: "",
@@ -27,15 +27,15 @@ interface NoteFormProps {
     onClose: () => void;
 }
 
-export default function NoteForm({ onClose }: NoteFormProps) {
+export default function NoteForm({onClose}: NoteFormProps) {
     const fieldId = useId();
     const queryClient = useQueryClient();
 
-    const { mutate, isPending } = useMutation({
+    const {mutate, isPending} = useMutation({
         mutationFn: (values: CreateNote) => createNote(values),
         onSuccess: () => {
             onClose();
-            queryClient.invalidateQueries({ queryKey: ["notes"] });
+            queryClient.invalidateQueries({queryKey: ["notes"]});
         },
         onError: (error) => {
             console.error("Failed to create note:", error);
@@ -62,7 +62,7 @@ export default function NoteForm({ onClose }: NoteFormProps) {
                         name="title"
                         className={css.input}
                     />
-                    <ErrorMessage component="div" name="title" className={css.error} />
+                    <ErrorMessage component="div" name="title" className={css.error}/>
                 </div>
 
                 <div className={css.formGroup}>
@@ -74,7 +74,7 @@ export default function NoteForm({ onClose }: NoteFormProps) {
                         rows={8}
                         className={css.textarea}
                     />
-                    <ErrorMessage component="div" name="content" className={css.error} />
+                    <ErrorMessage component="div" name="content" className={css.error}/>
                 </div>
 
                 <div className={css.formGroup}>
@@ -91,15 +91,11 @@ export default function NoteForm({ onClose }: NoteFormProps) {
                         <option value="Meeting">Meeting</option>
                         <option value="Shopping">Shopping</option>
                     </Field>
-                    <ErrorMessage component="div" name="tag" className={css.error} />
+                    <ErrorMessage component="div" name="tag" className={css.error}/>
                 </div>
 
                 <div className={css.actions}>
-                    <button
-                        onClick={onClose}
-                        type="button"
-                        className={css.cancelButton}
-                    >
+                    <button onClick={onClose} type="button" className={css.cancelButton}>
                         Cancel
                     </button>
                     <button
