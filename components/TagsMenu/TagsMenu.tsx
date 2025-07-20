@@ -1,18 +1,21 @@
 "use client";
 
-import {useState} from "react";
-import css from "./TagsMenu.module.css";
 import Link from "next/link";
+import css from "./TagsMenu.module.css";
+import {useState} from "react";
+
+const tags: string[] = ["Work", "Personal", "Meeting", "Shopping", "Todo"];
 
 export default function TagsMenu() {
     const [isOpen, setIsOpen] = useState(false);
-    const toggle = () => {
+
+    function toggle() {
         setIsOpen(!isOpen);
-    };
+    }
 
     return (
         <div className={css.menuContainer}>
-            <button onClick={toggle} className={css.menuButton}>
+            <button className={css.menuButton} onClick={toggle}>
                 Notes ▾
             </button>
             {isOpen && (
@@ -26,51 +29,17 @@ export default function TagsMenu() {
                             All notes
                         </Link>
                     </li>
-                    <li className={css.menuItem}>
-                        <Link
-                            href={`/notes/filter/Todo`}
-                            className={css.menuLink}
-                            onClick={toggle}
-                        >
-                            Todo
-                        </Link>
-                    </li>
-                    <li className={css.menuItem}>
-                        <Link
-                            href={`/notes/filter/Work`}
-                            className={css.menuLink}
-                            onClick={toggle}
-                        >
-                            Work
-                        </Link>
-                    </li>
-                    <li className={css.menuItem}>
-                        <Link
-                            href={`/notes/filter/Personal`}
-                            className={css.menuLink}
-                            onClick={toggle}
-                        >
-                            Personal
-                        </Link>
-                    </li>
-                    <li className={css.menuItem}>
-                        <Link
-                            href={`/notes/filter/Meeting`}
-                            className={css.menuLink}
-                            onClick={toggle}
-                        >
-                            Meeting
-                        </Link>
-                    </li>
-                    <li className={css.menuItem}>
-                        <Link
-                            href={`/notes/filter/Shopping`}
-                            className={css.menuLink}
-                            onClick={toggle}
-                        >
-                            Shopping
-                        </Link>
-                    </li>
+                    {tags.map((tag) => (
+                        <li className={css.menuItem} key={tag}>
+                            <Link
+                                href={`/notes/filter/${tag}`}
+                                className={css.menuLink}
+                                onClick={toggle}
+                            >
+                                {tag}
+                            </Link>
+                        </li>
+                    ))}
                 </ul>
             )}
         </div>

@@ -1,50 +1,28 @@
 "use client";
 
 import Modal from "@/components/Modal/Modal";
+import NotePreview from "@/components/NotePreview/NotePreview";
+import fetchNoteId from "@/lib/api";
 import {useQuery} from "@tanstack/react-query";
-import {fetchNoteById} from "@/lib/api";
-import css from "./NotePreview.module.css";
-import {useRouter} from "next/navigation";
-import {useParams} from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 
-export default function NotePreview() {
-    const {id} = useParams();
+export default function NotePreviewClient() {
     const router = useRouter();
-    const handlePrevious = () => router.back();
-
-    const {
-        data: note,
-        isLoading,
-        error,
-    } = useQuery({
-        queryKey: ["note", id],
-        queryFn: () => fetchNoteById(Number(id)),
+    const {id} = useParams<{ id: string }>();
+    const noteId = +id;
+    const {data} = useQuery({
+        queryKey: ["note", noteId],
+        queryFn: () => fetchNoteId(noteId),
         refetchOnMount: false,
     });
 
-    if (isLoading) return <p>Loading, please wait...</p>;
-
-    if (error || !note) return <p>Something went wrong.</p>;
-
-    const createdDate = `Created at: ${note.createdAt}`;
+    function handleClose() {
+        router.back();
+    }
 
     return (
-        <Modal onClose={handlePrevious}>
-            <div className={css.container}>
-                <div className={css.item}>
-                    <div className={css.header}>
-                        <h2>{note.title}</h2>
-                        <button onClick={handlePrevious} className={css.backBtn36}>
-                            Back
-                        </button>
-                    </div>
-                    <p className={css.content}>{note.content}</p>
-                    <div className={css.down}>
-                        <span className={css.tag}>{note.tag}</span>
-                        <p className={css.date}>{createdDate}</p>
-                    </div>
-                </div>
-            </div>
+        <Modal onClose={handleClose}>
+            <NotePreview note={data}/>
         </Modal>
     );
 }

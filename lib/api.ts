@@ -1,79 +1,95 @@
-import type {Note, CreateNote} from "../types/note";
 import axios from "axios";
+import type { CreateNoteValues, FetchNotesValues, Note } from "../types/note";
+import { toast } from "react-hot-toast";
 
-const API_URL = "https://notehub-public.goit.study/api";
-const token = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
+axios.defaults.baseURL = "https://notehub-public.goit.study/api";
 
-if (!token) {
-    throw new Error("Environment variable is not set");
-}
-
-const axiosInstance = axios.create({
-    baseURL: API_URL,
-    headers: {
-        Authorization: `Bearer ${token}`,
-    },
-});
-
-interface FetchNotes {
-    notes: Note[];
-    totalPages: number;
-}
-
-interface FetchParams {
+interface ParamsTypes {
+    page: number;
+    perPage: number;
     search?: string;
-    page?: number;
-    perPage?: number;
     tag?: string;
 }
 
 export async function fetchNotes(
-    searchText: string,
+    search: string,
     page: number,
-    perPage: number = 9,
-    tag?: string,
-): Promise<FetchNotes> {
+    tag: string | undefined
+): Promise<FetchNotesValues | undefined> {
     try {
-        const params: FetchParams = {
-            ...(searchText.trim() !== "" && {search: searchText.trim()}),
+        const perPage = 12;
+        const params: ParamsTypes = {
+            tag,
             page,
             perPage,
+        };
+
+        if (search?.trim()) {
+            params.search = search;
+        }
+        if (tag?.trim()) {
+            params.tag = tag;
+        }
+
+        const res = await axios.get<FetchNotesValues>("/notes", {
+            params,
+            headers: {
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+            },
+        });
+        return res.data;
+    } catch (error) {
+        toast.error(error instanceof Error ? error.message : String(error));
+    }
+}
+
+export async function createNote({
+                                     title,
+                                     content,
+                                     tag,
+                                 }: CreateNoteValues): Promise<Note | undefined> {
+    try {
+        const params: CreateNoteValues = {
+            title,
+            content,
             tag,
         };
-        const res = await axiosInstance.get<FetchNotes>("/notes", {params});
+
+        const res = await axios.post<Note>("/notes", params, {
+            headers: {
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+            },
+        });
         return res.data;
     } catch (error) {
-        console.error("Failed to fetch notes:", error);
-        throw new Error("Could not fetch notes. Please try again later.");
+        toast.error(error instanceof Error ? error.message : String(error));
     }
 }
 
-export async function createNote(newNote: CreateNote): Promise<Note> {
+export async function deleteNote(id: number): Promise<Note | undefined> {
     try {
-        const res = await axiosInstance.post<Note>("/notes", newNote);
+        const res = await axios.delete<Note>(`/notes/${id}`, {
+            headers: {
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+            },
+        });
         return res.data;
     } catch (error) {
-        console.error("Failed to create note:", error);
-        throw new Error("Could not create note. Please try again.");
+        toast.error(error instanceof Error ? error.message : String(error));
     }
 }
 
-export async function deleteNote(noteId: number): Promise<Note> {
+export default async function fetchNoteById(
+    id: number
+): Promise<Note | undefined> {
     try {
-        const res = await axiosInstance.delete<Note>(`/notes/${noteId}`);
+        const res = await axios.get<Note>(`notes/${id}`, {
+            headers: {
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+            },
+        });
         return res.data;
     } catch (error) {
-        console.error(`Failed to delete note with ID ${noteId}:`, error);
-        throw new Error("Could not delete the note.");
-    }
-}
-
-export async function fetchNoteById(noteId: number): Promise<Note> {
-    try {
-        const res = await axiosInstance.get<Note>(`/notes/${noteId}`);
-        return res.data;
-    } catch (error) {
-        console.error(`Failed to fetch note with ID ${noteId}:`, error);
-        throw new Error("Could not fetch note details.");
+        toast.error(error instanceof Error ? error.message : String(error));
     }
 }
