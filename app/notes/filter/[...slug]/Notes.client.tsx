@@ -1,44 +1,44 @@
 "use client";
 
-import { useState } from "react";
-import { useDebounce } from "use-debounce";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { fetchNotes } from "../../lib/api";
-import css from "./NotesPage.module.css";
-import {Note} from "@/types/note";
-import SearchBox from "@/components/SearchBox/SearchBox";
+import {useState, useEffect} from "react";
+import {useDebounce} from "use-debounce";
+import {useQuery, keepPreviousData} from "@tanstack/react-query";
+import {fetchNotes} from "@/lib/api";
 import Pagination from "@/components/Pagination/Pagination";
 import NoteList from "@/components/NoteList/NoteList";
-import NoteModal from "@/components/NoteModal/NoteModal";
+import NoteForm from "@/components/NoteForm/NoteForm";
+import Modal from "@/components/Modal/Modal";
+import SearchBox from "@/components/SearchBox/SearchBox";
+import type {Note} from "@/types/note";
+import css from "./NotesPage.module.css";
+import {number, string} from "yup";
 
 type Props = {
-    initialSearch: string;
-    initialPage: number;
     initialData: {
         notes: Note[];
         totalPages: number;
-    };
+    },
+    tag?: string,
+    category?: undefined | string
 };
 
-export default function NotesClient({
-                                        initialSearch,
-                                        initialPage,
-                                        initialData,
-                                    }: Props) {
+export default function NotesClient({initialData, tag, category}: Props) {
     const [searchText, setSearchText] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [debouncedSearch] = useDebounce(searchText, 300);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearch, tag]);
+
     const notes = useQuery({
-        queryKey: ["notes", debouncedSearch, currentPage],
-        queryFn: () => fetchNotes(debouncedSearch, currentPage),
+        queryKey: ["notes", debouncedSearch, currentPage, tag],
+        queryFn: () => fetchNotes(debouncedSearch, currentPage, 9, tag),
         placeholderData: keepPreviousData,
-        initialData:
-            debouncedSearch === initialSearch && currentPage === initialPage
-                ? initialData
-                : undefined,
+        refetchOnMount: false,
+        initialData,
     });
 
     const totalPages = notes.data?.totalPages ?? 0;
@@ -51,7 +51,7 @@ export default function NotesClient({
     return (
         <div className={css.app}>
             <header className={css.toolbar}>
-                <SearchBox value={searchText} onSearch={handleSearchChange} />
+                <SearchBox value={searchText} onSearch={handleSearchChange}/>
                 {totalPages > 1 && (
                     <Pagination
                         currentPage={currentPage}
@@ -71,10 +71,14 @@ export default function NotesClient({
             {notes.isLoading && <p>Loading...</p>}
             {notes.isError && <p>Error loading notes.</p>}
             {!notes.isLoading && !notes.isError && (
-                <NoteList notes={notes.data?.notes ?? []} />
+                <NoteList notes={notes.data?.notes ?? []}/>
             )}
 
-            {isModalOpen && <NoteModal onClose={() => setIsModalOpen(false)} />}
+            {isModalOpen && (
+                <Modal onClose={() => setIsModalOpen(false)}>
+                    <NoteForm onClose={() => setIsModalOpen(false)}/>
+                </Modal>
+            )}
         </div>
     );
 }
