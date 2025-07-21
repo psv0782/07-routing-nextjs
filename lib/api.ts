@@ -39,9 +39,7 @@ export async function fetchNotes(
         });
         return res.data;
     } catch (error) {
-        throw new Error(
-            error instanceof Error ? error.message : String(error)
-        );
+        throw new Error(error instanceof Error ? error.message : String(error));
     }
 }
 
@@ -64,7 +62,7 @@ export async function createNote({
         });
         return res.data;
     } catch (error) {
-        toast.error(error instanceof Error ? error.message : String(error));
+        throw new Error(error instanceof Error ? error.message : String(error));
     }
 }
 
@@ -77,7 +75,7 @@ export async function deleteNote(id: number): Promise<Note | undefined> {
         });
         return res.data;
     } catch (error) {
-        toast.error(error instanceof Error ? error.message : String(error));
+        throw new Error(error instanceof Error ? error.message : String(error));
     }
 }
 
@@ -92,6 +90,6 @@ export default async function fetchNoteById(
         });
         return res.data;
     } catch (error) {
-        toast.error(error instanceof Error ? error.message : String(error));
+        throw new Error(error instanceof Error ? error.message : String(error));
     }
 }
